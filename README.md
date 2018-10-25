@@ -1,14 +1,7 @@
-Clarisse Shotgun toolkit engine<a href="https://support.shotgunsoftware.com/hc/en-us/articles/219030778-Best-practices">
-<img src="https://raw.githubusercontent.com/shotgunsoftware/tk-desktop/master/icon_256.png" width="45" height="45" align="right"></a>
-<a href="https://www.isotropix.com/">
-<img src="https://d2.alternativeto.net/dist/icons/isotropix-clarisse-ifx_125727.png?width=128&height=128&mode=crop&upscale=false" width="45" height="45" align="right"></a>
+Clarisse Shotgun toolkit engine
 ===============================
 
-
-
-Contact : <a href="https://www.linkedin.com/in/diegogh/">Diego Garcia Huerta
-<img src="https://image.flaticon.com/icons/svg/174/174857.svg" width="14" height="14">
-</a>
+Contact : [Diego Garcia Huerta] ("https://www.linkedin.com/in/diegogh/")
 
 
 Implementation of a shotgun engine for **Clarise iFX**. This engine is based on the [tk-maya engine](https://github.com/shotgunsoftware/tk-maya) heavily adapted to Clarisse. It supports the classic boostrap startup methodology and integrates with clarisse adding a shotgun menu in it's menu bar.
@@ -33,6 +26,15 @@ With the engine, hooks for most of the standard tk application are provided:
 - [tk-multi-setframerange](#tk-multi-setframerange) 
 
 ## Engine Installation
+When I started using shotgun toolkit, one of the most frustrating things was to figure out how to install and configure a new tk application or an engine. Here are detailed instructions on how to make this engine work assuming you use a standard shotgun toolkit installation. (ie. no custom descriptors, REZ environments)
+
+
+We are going to copy the tk-clarisse engine into a folder so it becomes visible to the configuration files.
+All the tk engines that come with shotgun toolkit are located under a folder called 'app_store'  
+- copy tk-clarisse folder into your app_store shotgun configuration folder. ie. config/install/app_store.
+
+Since Clarisse User Interface is not written in Qt, this engine uses the 
+
 Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 
 ## tk-multi-workfiles2
