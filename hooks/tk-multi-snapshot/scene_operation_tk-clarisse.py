@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
@@ -16,12 +16,17 @@ import tank
 from tank import Hook
 from tank import TankError
 
+
+__author__ = "Diego Garcia Huerta"
+__email__ = "diegogh2000@gmail.com"
+
+
 class SceneOperation(Hook):
     """
     Hook called to perform an operation with the 
     current scene
     """
-    
+
     def execute(self, operation, file_path, **kwargs):
         """
         Main hook entry point
@@ -38,14 +43,14 @@ class SceneOperation(Hook):
                                      file path as a String
                     all others     - None
         """
-        
+
         if operation == "current_path":
             # return the current scene path
             return ix.application.get_current_project_filename()
         elif operation == "open":
-           ix.application.disable()
-           ix.application.load_project(file_path)
-           ix.application.enable()
+            ix.application.disable()
+            ix.application.load_project(file_path)
+            ix.application.enable()
         elif operation == "save":
             current_project = ix.application.get_current_project_filename()
             ix.application.save_project(current_project)

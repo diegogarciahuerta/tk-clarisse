@@ -9,10 +9,36 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+from contextlib import contextmanager
+
 import ix
+
 import sgtk
+from sgtk.util.filesystem import ensure_folder_exists
+
+
+__author__ = "Diego Garcia Huerta"
+__email__ = "diegogh2000@gmail.com"
+
 
 HookBaseClass = sgtk.get_hook_baseclass()
+
+
+@contextmanager
+def disabled_updates():
+    """
+    Convenient context that allows to execute a command disabling the
+    upating mechanism in Clarisse, which makes things faster.
+    """
+    clarisse_win = ix.application.get_event_window()
+    clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_WAIT)
+    ix.application.disable()
+
+    try:
+        yield
+    finally:
+        ix.application.enable()
+        clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_DEFAULT)
 
 
 class ClarisseStartVersionControlPlugin(HookBaseClass):
@@ -29,10 +55,7 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
 
         # look for icon one level up from this hook's folder in "icons" folder
         return os.path.join(
-            self.disk_location,
-            os.pardir,
-            "icons",
-            "version_up.png"
+            self.disk_location, os.pardir, "icons", "version_up.png"
         )
 
     @property
@@ -70,8 +93,8 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
         List of item types that this plugin is interested in.
 
         Only items matching entries in this list will be presented to the
-        accept() method. Strings can contain glob patters such as *, for example
-        ["clarisse.*", "file.clarisse"]
+        accept() method. Strings can contain glob patters such as *, for 
+        example ["clarisse.*", "file.clarisse"]
         """
         return ["clarisse.session"]
 
@@ -99,8 +122,8 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
     def accept(self, settings, item):
         """
         Method called by the publisher to determine if an item is of any
-        interest to this plugin. Only items matching the filters defined via the
-        item_filters property will be presented to this method.
+        interest to this plugin. Only items matching the filters defined via
+        the item_filters property will be presented to this method.
 
         A publish task will be generated for each item accepted here. Returns a
         dictionary with the following booleans:
@@ -115,8 +138,8 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
                 it will be unchecked. Optional, True by default.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property. 
+                         The values are `Setting` instances.
         :param item: Item to process
 
         :returns: dictionary with boolean keys accepted, required and enabled
@@ -128,11 +151,12 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
             version_number = self._get_version_number(path, item)
             if version_number is not None:
                 self.logger.info(
-                    "Clarisse '%s' plugin rejected the current session..." %
-                    (self.name,)
+                    "Clarisse '%s' plugin rejected the current session..."
+                    % (self.name,)
                 )
                 self.logger.info(
-                    "  There is already a version number in the file...")
+                    "  There is already a version number in the file..."
+                )
                 self.logger.info("  Clarisse file path: %s" % (path,))
                 return {"accepted": False}
         else:
@@ -141,21 +165,17 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
             # validation will succeed.
             self.logger.warn(
                 "The Clarisse session has not been saved.",
-                extra=_get_save_as_action()
+                extra=_get_save_as_action(),
             )
 
         self.logger.info(
-            "Clarisse '%s' plugin accepted the current session." %
-            (self.name,),
-            extra=_get_version_docs_action()
+            "Clarisse '%s' plugin accepted the current session." % (self.name,),
+            extra=_get_version_docs_action(),
         )
 
         # accept the plugin, but don't force the user to add a version number
         # (leave it unchecked)
-        return {
-            "accepted": True,
-            "checked": False
-        }
+        return {"accepted": True, "checked": False}
 
     def validate(self, settings, item):
         """
@@ -164,8 +184,8 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
         Returns a boolean to indicate validity.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property. 
+                         The values are `Setting` instances.
         :param item: Item to process
 
         :returns: True if item is valid, False otherwise.
@@ -178,10 +198,7 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
             # the session still requires saving. provide a save button.
             # validation fails
             error_msg = "The Clarisse session has not been saved."
-            self.logger.error(
-                error_msg,
-                extra=_get_save_as_action()
-            )
+            self.logger.error(error_msg, extra=_get_save_as_action())
             raise Exception(error_msg)
 
         # NOTE: If the plugin is attached to an item, that means no version
@@ -193,12 +210,11 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
         # get the path to a versioned copy of the file.
         version_path = publisher.util.get_version_path(path, "v001")
         if os.path.exists(version_path):
-            error_msg = "A file already exists with a version number. Please " \
-                        "choose another name."
-            self.logger.error(
-                error_msg,
-                extra=_get_save_as_action()
+            error_msg = (
+                "A file already exists with a version number. Please "
+                "choose another name."
             )
+            self.logger.error(error_msg, extra=_get_save_as_action())
             raise Exception(error_msg)
 
         return True
@@ -208,8 +224,8 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
         Executes the publish logic for the given item and settings.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property. 
+                         The values are `Setting` instances.
         :param item: Item to process
         """
 
@@ -227,7 +243,9 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
 
         # save to the new version path
         _save_session(version_path)
-        self.logger.info("A version number has been added to the Clarisse file...")
+        self.logger.info(
+            "A version number has been added to the Clarisse file..."
+        )
         self.logger.info("  Clarisse file path: %s" % (version_path,))
 
     def finalize(self, settings, item):
@@ -237,8 +255,8 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
         be used to version up files.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property. 
+                         The values are `Setting` instances.
         :param item: Item to process
         """
         pass
@@ -265,20 +283,22 @@ class ClarisseStartVersionControlPlugin(HookBaseClass):
         if work_template:
             if work_template.validate(path):
                 self.logger.debug(
-                    "Using work template to determine version number.")
+                    "Using work template to determine version number."
+                )
                 work_fields = work_template.get_fields(path)
                 if "version" in work_fields:
                     version_number = work_fields.get("version")
             else:
-                self.logger.debug(
-                    "Work template did not match path")
+                self.logger.debug("Work template did not match path")
         else:
             self.logger.debug(
-                "Work template unavailable for version extraction.")
+                "Work template unavailable for version extraction."
+            )
 
         if version_number is None:
             self.logger.debug(
-                "Using path info hook to determine version number.")
+                "Using path info hook to determine version number."
+            )
             version_number = publisher.util.get_version_number(path)
 
         return version_number
@@ -306,12 +326,8 @@ def _save_session(path):
     folder = os.path.dirname(path)
     ensure_folder_exists(folder)
 
-    clarisse_win = ix.application.get_event_window()
-    clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_WAIT)
-    ix.application.disable()
-    ix.application.save_project(path)
-    ix.application.enable()
-    clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_DEFAULT)
+    with disabled_updates():
+        ix.application.save_project(path)
 
 
 # TODO: method duplicated in all the clarisse hooks
@@ -334,7 +350,7 @@ def _get_save_as_action():
         "action_button": {
             "label": "Save As...",
             "tooltip": "Save the current session",
-            "callback": callback
+            "callback": callback,
         }
     }
 
@@ -347,7 +363,7 @@ def _get_version_docs_action():
         "action_open_url": {
             "label": "Version Docs",
             "tooltip": "Show docs for version formats",
-            "url": "https://support.shotgunsoftware.com/hc/en-us/articles/115000068574-User-Guide-WIP-#What%20happens%20when%20you%20publish"
+            "url": "https://support.shotgunsoftware.com/hc/en-us/articles/115000068574-User-Guide-WIP-#What%20happens%20when%20you%20publish",
         }
     }
 

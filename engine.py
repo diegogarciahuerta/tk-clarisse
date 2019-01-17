@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """A Clarisse engine for Tank."""
@@ -31,45 +31,73 @@ from tank.platform.constants import SHOTGUN_ENGINE_NAME
 import ix
 import pyqt_clarisse
 
+
 __author__ = "Diego Garcia Huerta"
+__email__ = "diegogh2000@gmail.com"
 
 # initialize our shotgun structure for the session
-if not hasattr(ix, 'shotgun'):
+if not hasattr(ix, "shotgun"):
     # use a dummy class to keep references to menus
     ix.shotgun = lambda: None
-    print "added shotgun property to ix"
     ix.shotgun.menu_callbacks = {}
-    print "ix.shotgun.menu_callbacks ", ix.shotgun.menu_callbacks 
 
 
 def show_error(msg):
     print("Shotgun Error | Clarisse engine | %s " % msg)
-    ix.application.message_box(msg, "Shotgun Error | Clarisse engine", ix.api.AppDialog.cancel(), ix.api.AppDialog.STYLE_OK)
+    ix.application.message_box(
+        msg,
+        "Shotgun Error | Clarisse engine",
+        ix.api.AppDialog.cancel(),
+        ix.api.AppDialog.STYLE_OK,
+    )
+
 
 def show_warning(msg):
-    ix.application.message_box(msg, "Shotgun Warning | Clarisse engine", ix.api.AppDialog.cancel(), ix.api.AppDialog.STYLE_OK)
+    ix.application.message_box(
+        msg,
+        "Shotgun Warning | Clarisse engine",
+        ix.api.AppDialog.cancel(),
+        ix.api.AppDialog.STYLE_OK,
+    )
+
 
 def show_info(msg):
-    ix.application.message_box(msg, "Shotgun Info | Clarisse engine", ix.api.AppDialog.cancel(), ix.api.AppDialog.STYLE_OK)
+    ix.application.message_box(
+        msg,
+        "Shotgun Info | Clarisse engine",
+        ix.api.AppDialog.cancel(),
+        ix.api.AppDialog.STYLE_OK,
+    )
+
 
 def display_error(msg):
     t = time.asctime(time.localtime())
     print("%s - Shotgun Error | Clarisse engine | %s " % (t, msg))
-    ix.application.log_error("%s - Shotgun Error | Clarisse engine | %s " % (t, msg))
+    ix.application.log_error(
+        "%s - Shotgun Error | Clarisse engine | %s " % (t, msg)
+    )
+
 
 def display_warning(msg):
     t = time.asctime(time.localtime())
-    ix.application.log_warning("%s - Shotgun Warning | Clarisse engine | %s " % (t, msg))
+    ix.application.log_warning(
+        "%s - Shotgun Warning | Clarisse engine | %s " % (t, msg)
+    )
+
 
 def display_info(msg):
     t = time.asctime(time.localtime())
-    ix.application.log_info("%s - Shotgun Info | Clarisse engine | %s " % (t, msg))
+    ix.application.log_info(
+        "%s - Shotgun Info | Clarisse engine | %s " % (t, msg)
+    )
+
 
 def display_debug(msg):
     if os.environ.get("TK_DEBUG") == "1":
         t = time.asctime(time.localtime())
-        ix.application.log_info("%s - Shotgun Debug | Clarisse engine | %s " % (t, msg))
-
+        ix.application.log_info(
+            "%s - Shotgun Debug | Clarisse engine | %s " % (t, msg)
+        )
 
 
 # we use a trick with decorators to get some sort of event notification
@@ -95,14 +123,16 @@ def wrapped(function, self, post_callback=None, pre_callback=None):
     return wrapper
 
 
-SCENE_EVENT_NAMES = ('new_project',
-                     'clear_project',
-                     'import_project',
-                     'load_project',
-                     'save_project',
-                     'load_startup_scene')
+SCENE_EVENT_NAMES = (
+    "new_project",
+    "clear_project",
+    "import_project",
+    "load_project",
+    "save_project",
+    "load_startup_scene",
+)
 
-SCENE_QUIT_EVENT_NAME = 'quit'
+SCENE_QUIT_EVENT_NAME = "quit"
 
 
 class SceneEventWatcher(object):
@@ -115,17 +145,19 @@ class SceneEventWatcher(object):
     Specifying run_once=True in the constructor causes all events to be
     cleaned up after the first one has triggered
     """
-    def __init__(self, cb_fn,
-                 run_once=False):
+
+    def __init__(self, cb_fn, run_once=False):
         """
         Constructor.
 
         :param cb_fn: Callcack to invoke everytime a scene event happens.
-        :param scene_events: List of scene events to watch for. Defaults to new, open and save.
-        :param run_once: If True, the watcher will notify only on the first event. Defaults to False.
+        :param scene_events: List of scene events to watch for. Defaults to 
+            new, open and save.
+        :param run_once: If True, the watcher will notify only on the first 
+            event. Defaults to False.
         """
         self.__cb_fn = cb_fn
-        self.__run_once=run_once
+        self.__run_once = run_once
         self.__wrapped_fns = {}
 
         # register scene event callbacks:
@@ -142,7 +174,11 @@ class SceneEventWatcher(object):
         for event_name in SCENE_EVENT_NAMES:
             try:
                 event_fn = getattr(ix.application, event_name)
-                event_fn = wrapped(event_fn, self, post_callback=SceneEventWatcher.__scene_event_callback)
+                event_fn = wrapped(
+                    event_fn,
+                    self,
+                    post_callback=SceneEventWatcher.__scene_event_callback,
+                )
                 self.__wrapped_fns[event_name] = event_fn
                 setattr(ix.application, event_name, event_fn)
                 display_debug("Registered callback on %s " % event_name)
@@ -154,7 +190,11 @@ class SceneEventWatcher(object):
         # create a callback that will be run when Clarisse
         # exits so we can do some clean-up:
         event_fn = getattr(ix.application, SCENE_QUIT_EVENT_NAME)
-        event_fn = wrapped(event_fn, self, pre_callback=SceneEventWatcher.__clarisse_exiting_callback)
+        event_fn = wrapped(
+            event_fn,
+            self,
+            pre_callback=SceneEventWatcher.__clarisse_exiting_callback,
+        )
         self.__wrapped_fns[SCENE_QUIT_EVENT_NAME] = event_fn
         setattr(ix.application, SCENE_QUIT_EVENT_NAME, event_fn)
 
@@ -183,9 +223,10 @@ class SceneEventWatcher(object):
         watcher.stop_watching()
 
 
-###############################################################################################
+###############################################################################
 # methods to support the state when the engine cannot start up
 # for example if a non-tank file is loaded in clarisse
+
 
 def refresh_engine(engine_name, prev_context, menu_name):
     """
@@ -219,17 +260,19 @@ def refresh_engine(engine_name, prev_context, menu_name):
         tk = tank.tank_from_path(new_path)
         # and construct the new context for this path:
         ctx = tk.context_from_path(new_path, prev_context)
-    except tank.TankError, e:
+    except tank.TankError:
         try:
-            ctx = current_engine.sgtk.context_from_entity_dictionary(current_engine.context.project)
-        except tank.TankError, e:
+            ctx = current_engine.sgtk.context_from_entity_dictionary(
+                current_engine.context.project
+            )
+        except tank.TankError:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
             message = ""
             message += "Shotgun Clarisse Engine cannot be started:.\n"
             message += "Please contact support@shotgunsoftware.com\n\n"
             message += "Exception: %s - %s\n" % (exc_type, exc_value)
             message += "Traceback (most recent call last):\n"
-            message += "\n".join( traceback.format_tb(exc_traceback))
+            message += "\n".join(traceback.format_tb(exc_traceback))
 
             # build disabled menu
             create_sgtk_disabled_menu(menu_name)
@@ -240,7 +283,8 @@ def refresh_engine(engine_name, prev_context, menu_name):
     # now remove the shotgun disabled menu if it exists.
     remove_sgtk_disabled_menu(menu_name)
 
-    # shotgun menu may have been removed, so add it back in if its not already there.
+    # shotgun menu may have been removed, so add it back in if its not already
+    # there.
     current_engine.create_shotgun_menu()
 
     if ctx != tank.platform.current_engine().context:
@@ -256,11 +300,14 @@ def on_scene_event_callback(engine_name, prev_context, menu_name):
     except Exception:
         (exc_type, exc_value, exc_traceback) = sys.exc_info()
         message = ""
-        message += "Message: Shotgun encountered a problem changing the Engine's context.\n"
+        message += (
+            "Message: Shotgun encountered a problem changing the "
+            "Engine's context.\n"
+        )
         message += "Please contact support@shotgunsoftware.com\n\n"
         message += "Exception: %s - %s\n" % (exc_type, exc_value)
         message += "Traceback (most recent call last):\n"
-        message += "\n".join( traceback.format_tb(exc_traceback))
+        message += "\n".join(traceback.format_tb(exc_traceback))
         show_error(message)
 
 
@@ -268,11 +315,14 @@ def sgtk_disabled_message():
     """
     Explain why tank is disabled.
     """
-    msg = ("Shotgun integration is disabled because it cannot recognize "
-           "the currently opened file.  Try opening another file or restarting "
-           "Clarisse.")
+    msg = (
+        "Shotgun integration is disabled because it cannot recognize "
+        "the currently opened file.  Try opening another file or restarting "
+        "Clarisse."
+    )
 
     show_warning(msg)
+
 
 def clear_sgtk_menu(menu_name):
     if not ix.is_gui_application():
@@ -283,12 +333,13 @@ def clear_sgtk_menu(menu_name):
     sg_menu.remove_all_commands()
     ix.shotgun.menu_callbacks = {}
 
+
 def get_sgtk_root_menu(menu_name):
     menu = ix.application.get_main_menu()
 
-    sg_menu = menu.get_item(menu_name+">")
+    sg_menu = menu.get_item(menu_name + ">")
     if not sg_menu:
-        sg_menu = menu.add_command(menu_name+">")
+        sg_menu = menu.add_command(menu_name + ">")
     return sg_menu
 
 
@@ -301,9 +352,12 @@ def create_sgtk_disabled_menu(menu_name):
         return
 
     sg_menu = get_sgtk_root_menu(menu_name)
-    menu_item = menu_name+">Sgtk is disabled."
+    menu_item = menu_name + ">Sgtk is disabled."
     ix.shotgun.menu_callbacks[menu_item] = sgtk_disabled_message
-    menu.add_command_as_script(menu_name+">Sgtk is disabled.", "ix.shotgun.menu_callbacks[%s]" % menu_item)
+    menu.add_command_as_script(
+        menu_name + ">Sgtk is disabled.",
+        "ix.shotgun.menu_callbacks[%s]" % menu_item,
+    )
 
 
 def remove_sgtk_disabled_menu(menu_name):
@@ -313,8 +367,9 @@ def remove_sgtk_disabled_menu(menu_name):
     clear_sgtk_menu(menu_name)
 
 
-###############################################################################################
+###############################################################################
 # The Tank Clarisse engine
+
 
 class ClarisseEngine(Engine):
     """
@@ -330,7 +385,6 @@ class ClarisseEngine(Engine):
         tank_platform_folder = os.path.abspath(inspect.getfile(tank.platform))
         return os.path.join(tank_platform_folder, "qt", filename)
 
-
     def __toggle_debug_logging(self):
         """
         Toggles global debug logging on and off in the log manager.
@@ -338,7 +392,6 @@ class ClarisseEngine(Engine):
         """
         # flip debug logging
         LogManager().global_debug = not LogManager().global_debug
-
 
     def __open_log_folder(self):
         """
@@ -349,13 +402,11 @@ class ClarisseEngine(Engine):
         if self.has_ui:
             # only import QT if we have a UI
             from sgtk.platform.qt import QtGui, QtCore
-            url = QtCore.QUrl.fromLocalFile(
-                LogManager().log_folder
-            )
+
+            url = QtCore.QUrl.fromLocalFile(LogManager().log_folder)
             status = QtGui.QDesktopServices.openUrl(url)
             if not status:
                 self._engine.log_error("Failed to open folder!")
-
 
     def __register_open_log_folder_command(self):
         """
@@ -371,8 +422,8 @@ class ClarisseEngine(Engine):
                     "short_name": "open_log_folder",
                     "icon": self.__get_platform_resource_path("folder_256.png"),
                     "description": "Opens the folder where log files are being stored.",
-                    "type": "context_menu"
-                }
+                    "type": "context_menu",
+                },
             )
 
     def __register_reload_command(self):
@@ -381,25 +432,30 @@ class ClarisseEngine(Engine):
         running apps are registered via a dev descriptor.
         """
         from tank.platform import restart
+
         self.register_command(
             "Reload and Restart",
             restart,
-            {"short_name": "restart",
-             "icon": self.__get_platform_resource_path("reload_256.png"),
-             "type": "context_menu"}
+            {
+                "short_name": "restart",
+                "icon": self.__get_platform_resource_path("reload_256.png"),
+                "type": "context_menu",
+            },
         )
 
     @property
     def context_change_allowed(self):
         """
-        Whether the engine allows a context change without the need for a restart.
+        Whether the engine allows a context change without the need for a
+        restart.
         """
         return True
 
     @property
     def host_info(self):
         """
-        :returns: A dictionary with information about the application hosting this engine.
+        :returns: A dictionary with information about the application hosting
+                  this engine.
 
         The returned dictionary is of the following form on success:
 
@@ -426,16 +482,18 @@ class ClarisseEngine(Engine):
             pass
         return host_info
 
-    ##########################################################################################
+    ###########################################################################
     # init and destroy
 
     def pre_app_init(self):
         """
-        Runs after the engine is set up but before any apps have been initialized.
+        Runs after the engine is set up but before any apps have been
+        initialized.
         """
         # unicode characters returned by the shotgun api need to be converted
         # to display correctly in all of the app windows
         from tank.platform.qt import QtCore
+
         # tell QT to interpret C strings as utf-8
         utf8 = QtCore.QTextCodec.codecForName("utf-8")
         QtCore.QTextCodec.setCodecForCStrings(utf8)
@@ -450,8 +508,10 @@ class ClarisseEngine(Engine):
         # check that we are running an ok version of clarisse
         current_os = sys.platform
         if current_os not in ["mac", "win32", "linux64"]:
-            raise tank.TankError("The current platform is not supported! Supported platforms "
-                                 "are Mac, Linux 64 and Windows 64.")
+            raise tank.TankError(
+                "The current platform is not supported! Supported platforms "
+                "are Mac, Linux 64 and Windows 64."
+            )
 
         clarisse_build_version = ix.application.get_version()
         clarisse_ver = float(".".join(clarisse_build_version.split(".")[:2]))
@@ -461,35 +521,49 @@ class ClarisseEngine(Engine):
             raise tank.TankError(msg)
 
         if clarisse_ver > 3.6:
-            # show a warning that this version of Clarisse isn't yet fully tested with Shotgun:
-            msg = ("The Shotgun Pipeline Toolkit has not yet been fully tested with Clarisse %s.  "
-                   "You can continue to use Toolkit but you may experience bugs or instability."
-                   "\n\nPlease report any issues to: support@shotgunsoftware.com"
-                   % (clarisse_ver))
+            # show a warning that this version of Clarisse isn't yet fully
+            # tested with Shotgun:
+            msg = (
+                "The Shotgun Pipeline Toolkit has not yet been fully tested with Clarisse %s.  "
+                "You can continue to use Toolkit but you may experience bugs or instability."
+                "\n\nPlease report any issues to: support@shotgunsoftware.com"
+                % (clarisse_ver)
+            )
 
             # determine if we should show the compatibility warning dialog:
-            show_warning_dlg = self.has_ui and "SGTK_COMPATIBILITY_DIALOG_SHOWN" not in os.environ
+            show_warning_dlg = (
+                self.has_ui
+                and "SGTK_COMPATIBILITY_DIALOG_SHOWN" not in os.environ
+            )
             if show_warning_dlg:
                 # make sure we only show it once per session:
                 os.environ["SGTK_COMPATIBILITY_DIALOG_SHOWN"] = "1"
 
-                # split off the major version number - accomodate complex version strings and decimals:
+                # split off the major version number - accomodate complex
+                # version strings and decimals:
                 major_version_number_str = clarisse_build_version.split(".")[0]
-                if major_version_number_str and major_version_number_str.isdigit():
+                if (
+                    major_version_number_str
+                    and major_version_number_str.isdigit()
+                ):
                     # check against the compatibility_dialog_min_version setting:
-                    if int(major_version_number_str) < self.get_setting("compatibility_dialog_min_version"):
+                    if int(major_version_number_str) < self.get_setting(
+                        "compatibility_dialog_min_version"
+                    ):
                         show_warning_dlg = False
 
             if show_warning_dlg:
-                # Note, title is padded to try to ensure dialog isn't insanely narrow!
+                # Note, title is padded to try to ensure dialog isn't insanely
+                # narrow!
                 show_info(msg)
 
             # always log the warning to the script editor:
             self.logger.warning(msg)
 
-            # In the case of Clarisse on Windows, we have the possility of locking
-            # up if we allow the PySide shim to import QtWebEngineWidgets. We can
-            # stop that happening here by setting the environment variable.
+            # In the case of Clarisse on Windows, we have the possility of
+            # locking up if we allow the PySide shim to import
+            # QtWebEngineWidgets. We can stop that happening here by setting
+            # the environment variable.
 
             if current_os.startswith("win"):
                 self.logger.debug(
@@ -508,11 +582,13 @@ class ClarisseEngine(Engine):
             self._menu_name = "Sgtk"
 
         if self.get_setting("automatic_context_switch", True):
-            # need to watch some scene events in case the engine needs rebuilding:
-            cb_fn = lambda en=self.instance_name, pc=self.context, mn=self._menu_name:on_scene_event_callback(en, pc, mn)
+            # need to watch some scene events in case the engine needs
+            # rebuilding:
+            cb_fn = lambda en=self.instance_name, pc=self.context, mn=self._menu_name: on_scene_event_callback(
+                en, pc, mn
+            )
             self.__watcher = SceneEventWatcher(cb_fn)
             self.logger.debug("Registered open and save callbacks.")
-
 
     def create_shotgun_menu(self):
         """
@@ -521,14 +597,17 @@ class ClarisseEngine(Engine):
         :return: bool
         """
 
-        # only create the shotgun menu if not in batch mode and menu doesn't already exist
+        # only create the shotgun menu if not in batch mode and menu doesn't
+        # already exist
         if self.has_ui:
 
             self._menu_handle = get_sgtk_root_menu(self._menu_name)
-            
+
             # create our menu handler
             tk_clarisse = self.import_module("tk_clarisse")
-            self._menu_generator = tk_clarisse.MenuGenerator(self, self._menu_handle)
+            self._menu_generator = tk_clarisse.MenuGenerator(
+                self, self._menu_handle
+            )
             self._menu_generator.create_menu()
             return True
 
@@ -541,13 +620,13 @@ class ClarisseEngine(Engine):
         from sgtk.platform.qt import QtGui
 
         qt_app = QtGui.QApplication.instance()
-        if qt_app is None:        
-           
+        if qt_app is None:
+
             self.log_debug("Initialising main QApplication...")
             qt_app = QtGui.QApplication([])
             qt_app.setWindowIcon(QtGui.QIcon(self.icon_256))
             qt_app.setQuitOnLastWindowClosed(False)
-            
+
             # set up the dark style
             self._initialize_dark_look_and_feel()
 
@@ -568,8 +647,9 @@ class ClarisseEngine(Engine):
 
     def post_context_change(self, old_context, new_context):
         """
-        Runs after a context change. The Clarisse event watching will be stopped
-        and new callbacks registered containing the new context information.
+        Runs after a context change. The Clarisse event watching will be
+        stopped and new callbacks registered containing the new context
+        information.
 
         :param old_context: The context being changed away from.
         :param new_context: The new context being changed to.
@@ -586,10 +666,8 @@ class ClarisseEngine(Engine):
             # This will ensure that the context_from_path call that occurs
             # after a File->Open receives an up-to-date "previous" context.
             self.__watcher.stop_watching()
-            cb_fn = lambda en=self.instance_name, pc=new_context, mn=self._menu_name:on_scene_event_callback(
-                engine_name=en,
-                prev_context=pc,
-                menu_name=mn,
+            cb_fn = lambda en=self.instance_name, pc=new_context, mn=self._menu_name: on_scene_event_callback(
+                engine_name=en, prev_context=pc, menu_name=mn
             )
             self.__watcher = SceneEventWatcher(cb_fn)
             self.logger.debug(
@@ -600,27 +678,32 @@ class ClarisseEngine(Engine):
             if old_context != new_context:
                 self.create_shotgun_menu()
 
-
     def _run_app_instance_commands(self):
         """
-        Runs the series of app instance commands listed in the 'run_at_startup' setting
-        of the environment configuration yaml file.
+        Runs the series of app instance commands listed in the 'run_at_startup' 
+        setting of the environment configuration yaml file.
         """
 
-        # Build a dictionary mapping app instance names to dictionaries of commands they registered with the engine.
+        # Build a dictionary mapping app instance names to dictionaries of
+        # commands they registered with the engine.
         app_instance_commands = {}
         for (command_name, value) in self.commands.iteritems():
             app_instance = value["properties"].get("app")
             if app_instance:
-                # Add entry 'command name: command function' to the command dictionary of this app instance.
-                command_dict = app_instance_commands.setdefault(app_instance.instance_name, {})
+                # Add entry 'command name: command function' to the command
+                # dictionary of this app instance.
+                command_dict = app_instance_commands.setdefault(
+                    app_instance.instance_name, {}
+                )
                 command_dict[command_name] = value["callback"]
 
-        # Run the series of app instance commands listed in the 'run_at_startup' setting.
+        # Run the series of app instance commands listed in the
+        # 'run_at_startup' setting.
         for app_setting_dict in self.get_setting("run_at_startup", []):
 
             app_instance_name = app_setting_dict["app_instance"]
-            # Menu name of the command to run or '' to run all commands of the given app instance.
+            # Menu name of the command to run or '' to run all commands of the
+            # given app instance.
             setting_command_name = app_setting_dict["name"]
 
             # Retrieve the command dictionary of the given app instance.
@@ -629,32 +712,53 @@ class ClarisseEngine(Engine):
             if command_dict is None:
                 self.logger.warning(
                     "%s configuration setting 'run_at_startup' requests app '%s' that is not installed.",
-                    self.name, app_instance_name)
+                    self.name,
+                    app_instance_name,
+                )
             else:
                 if not setting_command_name:
                     # Run all commands of the given app instance.
-                    # Run these commands once Clarisse will have completed its UI update and be idle
-                    # in order to run them after the ones that restore the persisted Shotgun app panels.
-                    for (command_name, command_function) in command_dict.iteritems():
-                        self.logger.debug("%s startup running app '%s' command '%s'.",
-                                       self.name, app_instance_name, command_name)
+                    # Run these commands once Clarisse will have completed its
+                    # UI update and be idle in order to run them after the ones
+                    # that restore the persisted Shotgun app panels.
+                    for (
+                        command_name,
+                        command_function,
+                    ) in command_dict.iteritems():
+                        self.logger.debug(
+                            "%s startup running app '%s' command '%s'.",
+                            self.name,
+                            app_instance_name,
+                            command_name,
+                        )
                         clarisse.utils.executeDeferred(command_function)
                 else:
-                    # Run the command whose name is listed in the 'run_at_startup' setting.
-                    # Run this command once Clarisse will have completed its UI update and be idle
-                    # in order to run it after the ones that restore the persisted Shotgun app panels.
+                    # Run the command whose name is listed in the
+                    # 'run_at_startup' setting.
+                    # Run this command once Clarisse will have completed its
+                    # UI update and be idle in order to run it after the ones
+                    # that restore the persisted Shotgun app panels.
                     command_function = command_dict.get(setting_command_name)
                     if command_function:
-                        self.logger.debug("%s startup running app '%s' command '%s'.",
-                                       self.name, app_instance_name, setting_command_name)
+                        self.logger.debug(
+                            "%s startup running app '%s' command '%s'.",
+                            self.name,
+                            app_instance_name,
+                            setting_command_name,
+                        )
                         clarisse.utils.executeDeferred(command_function)
                     else:
-                        known_commands = ', '.join("'%s'" % name for name in command_dict)
+                        known_commands = ", ".join(
+                            "'%s'" % name for name in command_dict
+                        )
                         self.logger.warning(
                             "%s configuration setting 'run_at_startup' requests app '%s' unknown command '%s'. "
                             "Known commands: %s",
-                            self.name, app_instance_name, setting_command_name, known_commands)
-
+                            self.name,
+                            app_instance_name,
+                            setting_command_name,
+                            known_commands,
+                        )
 
     def destroy_engine(self):
         """
@@ -679,7 +783,9 @@ class ClarisseEngine(Engine):
             self.logger.debug("PySide2 not detected - trying for PySide now...")
         else:
             # looks like pyside2 is already working! No need to do anything
-            self.logger.debug("PySide2 detected - the existing version will be used.")
+            self.logger.debug(
+                "PySide2 detected - the existing version will be used."
+            )
             return
 
         # then see if pyside is present
@@ -687,29 +793,53 @@ class ClarisseEngine(Engine):
             from PySide import QtGui
         except:
             # must be a very old version of Clarisse.
-            self.logger.debug("PySide not detected - it will be added to the setup now...")
+            self.logger.debug(
+                "PySide not detected - it will be added to the setup now..."
+            )
         else:
             # looks like pyside is already working! No need to do anything
-            self.logger.debug("PySide detected - the existing version will be used.")
+            self.logger.debug(
+                "PySide detected - the existing version will be used."
+            )
             return
 
         if sys.platform == "darwin":
-            pyside_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt471_mac", "python")
+            pyside_path = os.path.join(
+                self.disk_location,
+                "resources",
+                "pyside112_py26_qt471_mac",
+                "python",
+            )
             self.logger.debug("Adding pyside to sys.path: %s", pyside_path)
             sys.path.append(pyside_path)
 
         elif sys.platform == "win32":
             # default windows version of pyside for 2011 and 2012
-            pyside_path = os.path.join(self.disk_location, "resources","pyside111_py26_qt471_win64", "python")
+            pyside_path = os.path.join(
+                self.disk_location,
+                "resources",
+                "pyside111_py26_qt471_win64",
+                "python",
+            )
             self.logger.debug("Adding pyside to sys.path: %s", pyside_path)
             sys.path.append(pyside_path)
-            dll_path = os.path.join(self.disk_location, "resources","pyside111_py26_qt471_win64", "lib")
+            dll_path = os.path.join(
+                self.disk_location,
+                "resources",
+                "pyside111_py26_qt471_win64",
+                "lib",
+            )
             path = os.environ.get("PATH", "")
             path += ";%s" % dll_path
             os.environ["PATH"] = path
 
         elif sys.platform == "linux2":
-            pyside_path = os.path.join(self.disk_location, "resources","pyside112_py26_qt471_linux", "python")
+            pyside_path = os.path.join(
+                self.disk_location,
+                "resources",
+                "pyside112_py26_qt471_linux",
+                "python",
+            )
             self.logger.debug("Adding pyside to sys.path: %s", pyside_path)
             sys.path.append(pyside_path)
 
@@ -719,11 +849,13 @@ class ClarisseEngine(Engine):
         # now try to import it
         try:
             from PySide import QtGui
-        except Exception, e:
+        except Exception as exception:
             traceback.print_exc()
-            self.logger.error("PySide could not be imported! Apps using pyside will not "
-                           "operate correctly! Error reported: %s", e)
-
+            self.logger.error(
+                "PySide could not be imported! Apps using pyside will not "
+                "operate correctly! Error reported: %s",
+                exception,
+            )
 
     def _get_dialog_parent(self):
         """
@@ -755,13 +887,14 @@ class ClarisseEngine(Engine):
         else:
             return True
 
-    ##########################################################################################
+    ###########################################################################
     # logging
 
     def _emit_log_message(self, handler, record):
         """
         Called by the engine to log messages in Clarisse script editor.
-        All log messages from the toolkit logging namespace will be passed to this method.
+        All log messages from the toolkit logging namespace will be passed to
+        this method.
 
         :param handler: Log handler that this message was dispatched from.
                         Its default format is "[levelname basename] message".
@@ -774,13 +907,16 @@ class ClarisseEngine(Engine):
         # where "basename" is the leaf part of the logging record name,
         # for example "tk-multi-shotgunpanel" or "qt_importer".
         if record.levelno < logging.INFO:
-            formatter = logging.Formatter("Debug: Shotgun %(basename)s: %(message)s")
+            formatter = logging.Formatter(
+                "Debug: Shotgun %(basename)s: %(message)s"
+            )
         else:
             formatter = logging.Formatter("Shotgun %(basename)s: %(message)s")
 
         msg = formatter.format(record)
 
-        # Select Clarisse display function to use according to the logging record level.
+        # Select Clarisse display function to use according to the logging
+        # record level.
         if record.levelno >= logging.ERROR:
             fct = display_error
         elif record.levelno >= logging.WARNING:
@@ -797,29 +933,32 @@ class ClarisseEngine(Engine):
         # else:
         #     fct = display_error
 
-        # Display the message in Clarisse script editor in a thread safe manner.
+        # Display the message in Clarisse script editor in a thread safe manner
         self.async_execute_in_main_thread(fct, msg)
 
-    ##########################################################################################
+    ###########################################################################
     # scene and project management
 
     def close_windows(self):
         """
-        Closes the various windows (dialogs, panels, etc.) opened by the engine.
+        Closes the various windows (dialogs, panels, etc.) opened by the engine
         """
 
-        # Make a copy of the list of Tank dialogs that have been created by the engine and
-        # are still opened since the original list will be updated when each dialog is closed.
+        # Make a copy of the list of Tank dialogs that have been created by the
+        # engine and are still opened since the original list will be updated
+        # when each dialog is closed.
         opened_dialog_list = self.created_qt_dialogs[:]
 
         # Loop through the list of opened Tank dialogs.
         for dialog in opened_dialog_list:
             dialog_window_title = dialog.windowTitle()
             try:
-                # Close the dialog and let its close callback remove it from the original dialog list.
+                # Close the dialog and let its close callback remove it from
+                # the original dialog list.
                 self.logger.debug("Closing dialog %s.", dialog_window_title)
                 dialog.close()
-            except Exception, exception:
+            except Exception as exception:
                 traceback.print_exc()
-                self.logger.error("Cannot close dialog %s: %s", dialog_window_title, exception)
-
+                self.logger.error(
+                    "Cannot close dialog %s: %s", dialog_window_title, exception
+                )

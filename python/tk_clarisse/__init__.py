@@ -9,4 +9,3 @@
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 from .menu_generation import MenuGenerator
-from . import event_loop

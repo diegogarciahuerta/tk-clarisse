@@ -16,6 +16,10 @@ from sgtk import TankError
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
+__author__ = "Diego Garcia Huerta"
+__email__ = "diegogh2000@gmail.com"
+
+
 class FrameOperation(HookBaseClass):
     """
     Hook called to perform a frame operation with the 
@@ -39,7 +43,8 @@ class FrameOperation(HookBaseClass):
 
         :returns:   Depends on operation:
                     'set_frame_range' - Returns if the operation was succesfull
-                    'get_frame_range' - Returns the frame range in the form (in_frame, out_frame)
+                    'get_frame_range' - Returns the frame range in the form
+                                        (in_frame, out_frame)
         """
 
         if operation == "get_frame_range":

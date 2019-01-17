@@ -13,13 +13,18 @@ import os
 import ix
 import sgtk
 
+
+__author__ = "Diego Garcia Huerta"
+__email__ = "diegogh2000@gmail.com"
+
+
 HookBaseClass = sgtk.get_hook_baseclass()
 
 
 class ClarisseSessionCollector(HookBaseClass):
     """
-    Collector that operates on the clarisse session. Should inherit from the basic
-    collector hook.
+    Collector that operates on the clarisse session. Should inherit from the
+    basic collector hook.
     """
 
     @property

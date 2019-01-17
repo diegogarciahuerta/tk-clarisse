@@ -1,19 +1,43 @@
 # Copyright (c) 2017 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 import os
+from contextlib import contextmanager
+
 import ix
 import sgtk
 from sgtk.util.filesystem import ensure_folder_exists
 
+
+__author__ = "Diego Garcia Huerta"
+__email__ = "diegogh2000@gmail.com"
+
+
 HookBaseClass = sgtk.get_hook_baseclass()
+
+
+@contextmanager
+def disabled_updates():
+    """
+    Convenient context that allows to execute a command disabling the
+    upating mechanism in Clarisse, which makes things faster.
+    """
+    clarisse_win = ix.application.get_event_window()
+    clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_WAIT)
+    ix.application.disable()
+
+    try:
+        yield
+    finally:
+        ix.application.enable()
+        clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_DEFAULT)
 
 
 class ClarisseSessionPublishPlugin(HookBaseClass):
@@ -37,7 +61,9 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         contain simple html for formatting.
         """
 
-        loader_url = "https://support.shotgunsoftware.com/hc/en-us/articles/219033078"
+        loader_url = (
+            "https://support.shotgunsoftware.com/hc/en-us/articles/219033078"
+        )
 
         return """
         Publishes the file to Shotgun. A <b>Publish</b> entry will be
@@ -56,7 +82,7 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         file to the next version after publishing.
 
         The <code>version</code> field of the resulting <b>Publish</b> in
-        Shotgun will also reflect the version number identified in the filename.
+        Shotgun will also reflect the version number identified in the filename
         The basic worklfow recognizes the following version formats by default:
 
         <ul>
@@ -71,8 +97,8 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         and copied to <code>filename.v002.ext</code>
 
         If the next incremental version of the file already exists on disk, the
-        validation step will produce a warning, and a button will be provided in
-        the logging output which will allow saving the session to the next
+        validation step will produce a warning, and a button will be provided
+        in the logging output which will allow saving the session to the next
         available version number prior to publishing.
 
         <br><br><i>NOTE: any amount of version number padding is supported. for
@@ -83,7 +109,9 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         however only the most recent publish will be available to other users.
         Warnings will be provided during validation if there are previous
         publishes.
-        """ % (loader_url,)
+        """ % (
+            loader_url,
+        )
 
     @property
     def settings(self):
@@ -114,8 +142,8 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
                 "type": "template",
                 "default": None,
                 "description": "Template path for published work files. Should"
-                               "correspond to a template defined in "
-                               "templates.yml.",
+                "correspond to a template defined in "
+                "templates.yml.",
             }
         }
 
@@ -130,16 +158,16 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         List of item types that this plugin is interested in.
 
         Only items matching entries in this list will be presented to the
-        accept() method. Strings can contain glob patters such as *, for example
-        ["clarisse.*", "file.clarisse"]
+        accept() method. Strings can contain glob patters such as *, for 
+        example ["clarisse.*", "file.clarisse"]
         """
         return ["clarisse.session"]
 
     def accept(self, settings, item):
         """
         Method called by the publisher to determine if an item is of any
-        interest to this plugin. Only items matching the filters defined via the
-        item_filters property will be presented to this method.
+        interest to this plugin. Only items matching the filters defined via 
+        the item_filters property will be presented to this method.
 
         A publish task will be generated for each item accepted here. Returns a
         dictionary with the following booleans:
@@ -154,8 +182,8 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
                 it will be unchecked. Optional, True by default.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property. The values
+                         are `Setting` instances.
         :param item: Item to process
 
         :returns: dictionary with boolean keys accepted, required and enabled
@@ -175,17 +203,14 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
             # validation will succeed.
             self.logger.warn(
                 "The Clarisse session has not been saved.",
-                extra=_get_save_as_action()
+                extra=_get_save_as_action(),
             )
 
         self.logger.info(
-            "Clarisse '%s' plugin accepted the current Clarisse session." %
-            (self.name,)
+            "Clarisse '%s' plugin accepted the current Clarisse session."
+            % (self.name,)
         )
-        return {
-            "accepted": True,
-            "checked": True
-        }
+        return {"accepted": True, "checked": True}
 
     def validate(self, settings, item):
         """
@@ -193,8 +218,8 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         boolean to indicate validity.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property. The values 
+                         are `Setting` instances.
         :param item: Item to process
         :returns: True if item is valid, False otherwise.
         """
@@ -208,10 +233,7 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
             # the session still requires saving. provide a save button.
             # validation fails.
             error_msg = "The Clarisse session has not been saved."
-            self.logger.error(
-                error_msg,
-                extra=_get_save_as_action()
-            )
+            self.logger.error(error_msg, extra=_get_save_as_action())
             raise Exception(error_msg)
 
         # ---- check the session against any attached work template
@@ -234,15 +256,16 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
                         "action_button": {
                             "label": "Save File",
                             "tooltip": "Save the current Clarisse session to a "
-                                       "different file name",
+                            "different file name",
                             # will launch wf2 if configured
-                            "callback": _get_save_as_action()
+                            "callback": _get_save_as_action(),
                         }
-                    }
+                    },
                 )
             else:
                 self.logger.debug(
-                    "Work template configured and matches session file.")
+                    "Work template configured and matches session file."
+                )
         else:
             self.logger.debug("No work template configured.")
 
@@ -258,7 +281,8 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
             # the next one until we get one that doesn't exist.
             while os.path.exists(next_version_path):
                 (next_version_path, version) = self._get_next_version_info(
-                    next_version_path, item)
+                    next_version_path, item
+                )
 
             error_msg = "The next version of this file already exists on disk."
             self.logger.error(
@@ -267,10 +291,10 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
                     "action_button": {
                         "label": "Save to v%s" % (version,),
                         "tooltip": "Save to the next available version number, "
-                                   "v%s" % (version,),
-                        "callback": lambda: _save_session(next_version_path)
+                        "v%s" % (version,),
+                        "callback": lambda: _save_session(next_version_path),
                     }
-                }
+                },
             )
             raise Exception(error_msg)
 
@@ -279,24 +303,28 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         # populate the publish template on the item if found
         publish_template_setting = settings.get("Publish Template")
         publish_template = publisher.engine.get_template_by_name(
-            publish_template_setting.value)
+            publish_template_setting.value
+        )
         if publish_template:
             item.properties["publish_template"] = publish_template
 
-        # set the session path on the item for use by the base plugin validation
+        # set the session path on the item for use by the base plugin
+        # validation
         # step. NOTE: this path could change prior to the publish phase.
         item.properties["path"] = path
 
         # run the base class validation
-        return super(ClarisseSessionPublishPlugin, self).validate(settings, item)
+        return super(ClarisseSessionPublishPlugin, self).validate(
+            settings, item
+        )
 
     def publish(self, settings, item):
         """
         Executes the publish logic for the given item and settings.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property.
+                         The values are `Setting` instances.
         :param item: Item to process
         """
 
@@ -311,8 +339,9 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         item.properties["path"] = path
 
         # add dependencies for the base class to register when publishing
-        item.properties["publish_dependencies"] = \
-            _clarisse_find_additional_session_dependencies()
+        item.properties[
+            "publish_dependencies"
+        ] = _clarisse_find_additional_session_dependencies()
 
         # let the base class register the publish
         super(ClarisseSessionPublishPlugin, self).publish(settings, item)
@@ -323,8 +352,8 @@ class ClarisseSessionPublishPlugin(HookBaseClass):
         tasks have completed, and can for example be used to version up files.
 
         :param settings: Dictionary of Settings. The keys are strings, matching
-            the keys returned in the settings property. The values are `Setting`
-            instances.
+                         the keys returned in the settings property.
+                         The values are `Setting` instances.
         :param item: Item to process
         """
 
@@ -346,23 +375,25 @@ def _clarisse_find_additional_session_dependencies():
     # but it briefly changes the state of the scene.
     # https://forum.isotropix.com/viewtopic.php?p=14779
 
-    types = ("GeometryPolyfile",
-             "GeometryVolumeFile",
-             "GeometryBundleAlembic",
-             "ProcessAlembicExport",
-             "TextureMapFile",
-             "TextureStreamedMapFile",
-             "TextureOslFile")
+    types = (
+        "GeometryPolyfile",
+        "GeometryVolumeFile",
+        "GeometryBundleAlembic",
+        "ProcessAlembicExport",
+        "TextureMapFile",
+        "TextureStreamedMapFile",
+        "TextureOslFile",
+    )
 
     # default implementation looks for references and
     # textures (file nodes) and returns any paths that
     # match a template defined in the configuration
     ref_paths = set()
     for type_ in types:
-        objects = ix.api.OfObjectVector() 
+        objects = ix.api.OfObjectVector()
         ix.application.get_matching_objects(objects, "*", type_)
         for object in objects:
-            attr = object.get_attribute('filename')
+            attr = object.get_attribute("filename")
             if attr:
                 ref_paths.add(attr.get_string())
 
@@ -391,12 +422,8 @@ def _save_session(path):
     folder = os.path.dirname(path)
     ensure_folder_exists(folder)
 
-    clarisse_win = ix.application.get_event_window()
-    clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_WAIT)
-    ix.application.disable()
-    ix.application.save_project(path)
-    ix.application.enable()
-    clarisse_win.set_mouse_cursor(ix.api.Gui.MOUSE_CURSOR_DEFAULT)
+    with disabled_updates():
+        ix.application.save_project(path)
 
 
 # TODO: method duplicated in all the clarisse hooks
@@ -419,9 +446,10 @@ def _get_save_as_action():
         "action_button": {
             "label": "Save As...",
             "tooltip": "Save the current session",
-            "callback": callback
+            "callback": callback,
         }
     }
+
 
 def _save_as():
     ix.application.get_main_menu().exec_command("File>Save As...")
