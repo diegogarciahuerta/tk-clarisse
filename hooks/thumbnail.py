@@ -40,13 +40,13 @@ class ThumbnailHook(Hook):
         engine_name = engine.name
 
         # depending on engine:
-        if engine_name == "tk-natron":
-            return self._extract_natron_thumbnail()
+        if engine_name == "tk-clarisse":
+            return self._extract_clarisse_thumbnail()
 
         # default implementation does nothing
         return None
 
-    def _extract_natron_thumbnail(self):
+    def _extract_clarisse_thumbnail(self):
         """
         Render a thumbnail for the current canvas in Natron
 

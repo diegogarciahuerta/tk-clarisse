@@ -6,7 +6,7 @@ Contact : [Diego Garcia Huerta]("https://www.linkedin.com/in/diegogh/")
 
 ## Overview
 
-Implementation of a shotgun engine for **Clarise iFX**(https://www.isotropix.com/products/clarisse/ifx). This engine is based on the [tk-maya engine](https://github.com/shotgunsoftware/tk-maya) heavily adapted to Clarisse. It supports the classic boostrap startup methodology and integrates with clarisse adding a shotgun menu in it's menu bar.
+Implementation of a shotgun toolkit engine for **Clarise iFX**(https://www.isotropix.com/products/clarisse/ifx). This engine is based on the [tk-maya engine](https://github.com/shotgunsoftware/tk-maya) heavily adapted to Clarisse. It supports the classic boostrap startup methodology and integrates with clarisse adding a shotgun menu in it's menu bar.
 
 * [Engine Installation](#engine-installation)
 * [Configuring your project for Shotgun Toolkit](#configuring-your-project-for-shotgun-toolkit)
