@@ -17,7 +17,7 @@ import re
 import inspect
 import logging
 
-from functools import wraps
+from functools import wraps, partial
 
 import tank
 import traceback
@@ -103,17 +103,17 @@ def display_debug(msg):
 # we use a trick with decorators to get some sort of event notification
 # when the scene is saved/loaded, etc... we could use a timer similar to
 # what tk-houdini uses but this other apporach is more generic
-def wrapped(function, self, post_callback=None, pre_callback=None):
+def wrapped(function, watcher, post_callback=None, pre_callback=None):
     @wraps(function)
     def wrapper(*args, **kwargs):
         try:
             if pre_callback is not None:
-                pre_callback(self)
+                pre_callback(watcher)
 
             result = function(*args, **kwargs)
 
             if post_callback is not None:
-                post_callback(self)
+                post_callback(watcher)
 
             return result
         except:
@@ -150,7 +150,7 @@ class SceneEventWatcher(object):
         """
         Constructor.
 
-        :param cb_fn: Callcack to invoke everytime a scene event happens.
+        :param cb_fn: Callback to invoke everytime a scene event happens.
         :param scene_events: List of scene events to watch for. Defaults to 
             new, open and save.
         :param run_once: If True, the watcher will notify only on the first 
@@ -269,7 +269,7 @@ def refresh_engine(engine_name, prev_context, menu_name):
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
             message = ""
             message += "Shotgun Clarisse Engine cannot be started:.\n"
-            message += "Please contact support@shotgunsoftware.com\n\n"
+            message += "Please contact you technical support team for more information.\n\n"
             message += "Exception: %s - %s\n" % (exc_type, exc_value)
             message += "Traceback (most recent call last):\n"
             message += "\n".join(traceback.format_tb(exc_traceback))
@@ -304,7 +304,7 @@ def on_scene_event_callback(engine_name, prev_context, menu_name):
             "Message: Shotgun encountered a problem changing the "
             "Engine's context.\n"
         )
-        message += "Please contact support@shotgunsoftware.com\n\n"
+        message += "Please contact you technical support team for more information.\n\n"
         message += "Exception: %s - %s\n" % (exc_type, exc_value)
         message += "Traceback (most recent call last):\n"
         message += "\n".join(traceback.format_tb(exc_traceback))
@@ -520,13 +520,13 @@ class ClarisseEngine(Engine):
             msg = "Shotgun integration is not compatible with Clarisse versions older than 3.6"
             raise tank.TankError(msg)
 
-        if clarisse_ver > 3.6:
+        if clarisse_ver > 4.0:
             # show a warning that this version of Clarisse isn't yet fully
             # tested with Shotgun:
             msg = (
-                "The Shotgun Pipeline Toolkit has not yet been fully tested with Clarisse %s.  "
+                "The Shotgun Pipeline Toolkit has not yet been fully tested with Clarisse %s.\n"
                 "You can continue to use Toolkit but you may experience bugs or instability."
-                "\n\nPlease report any issues to: support@shotgunsoftware.com"
+                "\n\nUse at your own risk."
                 % (clarisse_ver)
             )
 
@@ -584,10 +584,10 @@ class ClarisseEngine(Engine):
         if self.get_setting("automatic_context_switch", True):
             # need to watch some scene events in case the engine needs
             # rebuilding:
-            cb_fn = lambda en=self.instance_name, pc=self.context, mn=self._menu_name: on_scene_event_callback(
-                en, pc, mn
-            )
-            self.__watcher = SceneEventWatcher(cb_fn)
+
+            cb_fn = partial(on_scene_event_callback, engine_name=self.instance_name, prev_context=self.context, menu_name=self._menu_name)
+            
+            self.__watcher = SceneEventWatcher(cb_fn, run_once=False)
             self.logger.debug("Registered open and save callbacks.")
 
     def create_shotgun_menu(self):
@@ -666,10 +666,10 @@ class ClarisseEngine(Engine):
             # This will ensure that the context_from_path call that occurs
             # after a File->Open receives an up-to-date "previous" context.
             self.__watcher.stop_watching()
-            cb_fn = lambda en=self.instance_name, pc=new_context, mn=self._menu_name: on_scene_event_callback(
-                engine_name=en, prev_context=pc, menu_name=mn
-            )
-            self.__watcher = SceneEventWatcher(cb_fn)
+
+            cb_fn = partial(on_scene_event_callback, engine_name=self.instance_name, prev_context=self.context, menu_name=self._menu_name)
+
+            self.__watcher = SceneEventWatcher(cb_fn, run_once=False)
             self.logger.debug(
                 "Registered new open and save callbacks before changing context."
             )
@@ -859,22 +859,10 @@ class ClarisseEngine(Engine):
 
     def _get_dialog_parent(self):
         """
-        Get the QWidget parent for all dialogs created through
-        show_dialog & show_modal.
+        Clarisse is not Qt Based so we do not have anything to return here.
         """
         return None
-        # # Find a parent for the dialog - this is the Clarisse mainWindow()
-        # from tank.platform.qt import QtGui
 
-        # try:
-        #     import shiboken2 as shiboken
-        # except ImportError:
-        #     import shiboken
-
-        # ptr = OpenClarisseUI.MQtUtil.mainWindow()
-        # parent = shiboken.wrapInstance(long(ptr), QtGui.QMainWindow)
-
-        # return parent
 
     @property
     def has_ui(self):
@@ -925,13 +913,6 @@ class ClarisseEngine(Engine):
             fct = display_info
         else:
             fct = display_debug
-
-        # if record.levelno < logging.WARNING:
-        #     fct = display_info
-        # elif record.levelno < logging.ERROR:
-        #     fct = display_warning
-        # else:
-        #     fct = display_error
 
         # Display the message in Clarisse script editor in a thread safe manner
         self.async_execute_in_main_thread(fct, msg)

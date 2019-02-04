@@ -17,11 +17,28 @@ __author__ = "Diego Garcia Huerta"
 __email__ = "diegogh2000@gmail.com"
 
 
+
+def get_contexts(context, result=None):
+    """
+    Returns all the subcontexts of the given context recursively
+    """
+    if result is None:
+        result = []
+        
+    result.append(context)
+    subcontext_count = context.get_context_count()
+    for i in range(subcontext_count):
+        subcontext = context.get_context(i)
+        get_contexts(subcontext, result=result)
+        
+    return result
+    
+
 class BreakdownSceneOperations(Hook):
     """
     Breakdown operations for Clarisse.
 
-    This implementation handles detection of clarisse file geomatric, 
+    This implementation handles detection of clarisse file geometric, 
     alembic and texture nodes.
     """
 
@@ -48,7 +65,7 @@ class BreakdownSceneOperations(Hook):
         date.
         """
 
-        # These classes contain a filename propertym which could contain
+        # These classes contain a filename property which could contain
         # publishedFiles and could count as dependencies.
         #
         # This link has got a way to get these types dynamically
@@ -59,9 +76,12 @@ class BreakdownSceneOperations(Hook):
 
         types = (
             "GeometryPolyfile",
+            "GeometryFurFile",
             "GeometryVolumeFile",
             "GeometryBundleAlembic",
+            "GeometryBundleUsd",
             "ProcessAlembicExport",
+            "LightPhysicalSphere", 
             "TextureMapFile",
             "TextureStreamedMapFile",
             "TextureOslFile",
@@ -78,6 +98,18 @@ class BreakdownSceneOperations(Hook):
                     refs.append(
                         {"attr": attr, "type": "file", "path": ref_path}
                     )
+
+        # also do the contexts
+        context= ix.get_current_context()
+        contexts = get_contexts(context)
+        for context in contexts:
+            attr = context.get_attribute('filename')
+            if attr:
+                ref_path = attr.get_string()
+                ref_path = ref_path.replace("/", os.path.sep)
+                refs.append(
+                    {"attr": attr, "type": "file", "path": ref_path}
+                )
         return refs
 
     def update(self, items):
