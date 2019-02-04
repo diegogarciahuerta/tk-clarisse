@@ -1,12 +1,12 @@
 # Clarisse Shotgun toolkit engine
 
-Contact : [Diego Garcia Huerta]("https://www.linkedin.com/in/diegogh/")
+Contact : [Diego Garcia Huerta](https://www.linkedin.com/in/diegogh/)
 
 ![tk-clarisse_screenshot01](config/images/tk-clarisse_screenshot01.PNG)
 
 ## Overview
 
-Implementation of a shotgun toolkit engine for **Clarise iFX**(https://www.isotropix.com/products/clarisse/ifx). This engine is based on the [tk-maya engine](https://github.com/shotgunsoftware/tk-maya) heavily adapted to Clarisse. It supports the classic boostrap startup methodology and integrates with clarisse adding a shotgun menu in it's menu bar.
+Implementation of a shotgun toolkit engine for [**Clarise iFX**](https://www.isotropix.com/products/clarisse/ifx). This engine is based on the [tk-maya engine](https://github.com/shotgunsoftware/tk-maya) heavily adapted to Clarisse. It supports the classic boostrap startup methodology and integrates with clarisse adding a shotgun menu in it's menu bar.
 
 * [Engine Installation](#engine-installation)
 * [Configuring your project for Shotgun Toolkit](#configuring-your-project-for-shotgun-toolkit)
@@ -24,9 +24,9 @@ With the engine, hooks for most of the standard tk application are provided:
 * [tk-multi-breakdown](#tk-multi-breakdown)
 * [tk-multi-setframerange](#tk-multi-setframerange) ( see notes below as this is a fork from the original shotgun repository to allow having hooks per engine, as the original one has support only for certain applications)
 
-(I've also included a hook that allows to take a thumbnail of clarisse window, useful for configuring tk-multi-snapshot for example.)
+(I've also included a hook that allows to take a [thumbnail](hooks/thumbnail.py) of clarisse window, useful for configuring tk-multi-snapshot for example.)
 
-This engine has been tested in Windows using Clarisse iFX version 3.6, and Clarisse iFX version 4.0 Learning Edition (just released at the time of writting)
+**Note: This engine has been tested in Windows using Clarisse iFX version 3.6, and Clarisse iFX version 4.0 Learning Edition (just released at the time of writting)**
 
 
 ## Engine Installation
@@ -35,12 +35,13 @@ When I started using shotgun toolkit, I found quite challenging figuring out how
 
 If you are familiar with how to setup an engine and apps, you might want to skip the rest of this document, just make sure to check the [templates](config/core/templates.yml) and [additions to the configs](config/env) that might give you a good start.
 
-If you are new to shotgun toolkit, I recommend to read at least the following shotgun articles, so you get familiar with how the configuration files are setup, and the terminology used:
+If you are new to shotgun toolkit, I recommend you to read at least the following shotgun articles, so you get familiar with how the configuration files are setup, and the terminology used:
 
 * [App and Engine Configuration Reference](https://support.shotgunsoftware.com/hc/en-us/articles/219039878-App-and-Engine-Configuration-Reference)
 * [Overview of Toolkit's New Default Configuration](https://support.shotgunsoftware.com/hc/en-us/articles/115004077494-Overview-of-Toolkit-s-New-Default-Configuration-)
 
 Here are detailed instructions on how to make this engine work assuming you use a standard shotgun toolkit installation and have downloaded shotgun desktop.
+
 [Shotgun Desktop Download Instructions](https://support.shotgunsoftware.com/hc/en-us/articles/115000068574#Getting%20started%20with%20Shotgun%20Desktop)
 
 
@@ -150,7 +151,8 @@ In order for Clarisse to show up in the shotgun launcher, we need to add it to o
 
 * Navigate to your shotgun url, ie. `example.shotgunstudio.com`, and once logged in, clink in the Shotgun Settings menu, the arrow at the top right of the webpage, close to your user picture. 
 * Click in the Software menu
-![select_a_project_configuration](config/images/select_a_project_configuration.png)
+
+  ![software_entity](config/images/software_entity.png)
 
 * We will create a new entry for Clarisse, called "Clarisse". The description was conveniently copied and pasted from Wikipedia.
 ![create_new_software](config/images/create_new_software.png)
@@ -213,7 +215,7 @@ Only the basic publishing of the current session is provided with this app.
 
 The Scene Breakdown App shows you a list of items you have loaded (referenced) in your scene and tells you which ones are out of date. From this overview, you can select multiple objects and click the update button which will update all your selected items to use the latest published version.
 
-Hook provided support the updating of the following type of nodes (basically, alembic, usd, or any other geometric format supported at of the writting of the engine):
+Hook provided support the updating of the following type of nodes (basically, alembic, usd, or any other geometric format supported at the time of writting):
 - GeometryPolyfile
 - GeometryFurFile
 - GeometryVolumeFile

@@ -48,7 +48,7 @@ class ThumbnailHook(Hook):
 
     def _extract_clarisse_thumbnail(self):
         """
-        Render a thumbnail for the current canvas in Natron
+        Render a thumbnail for the current window in Clarisse
 
         :returns:   The path to the thumbnail on disk
         """
