@@ -96,7 +96,7 @@ class BreakdownSceneOperations(Hook):
                     ref_path = attr.get_string()
                     ref_path = ref_path.replace("/", os.path.sep)
                     refs.append(
-                        {"attr": attr, "type": "file", "path": ref_path}
+                        {"attr": attr, "type": "file", "path": ref_path, "node":attr}
                     )
 
         # also do the contexts
@@ -108,7 +108,7 @@ class BreakdownSceneOperations(Hook):
                 ref_path = attr.get_string()
                 ref_path = ref_path.replace("/", os.path.sep)
                 refs.append(
-                    {"attr": attr, "type": "file", "path": ref_path}
+                    {"type": "file", "path": ref_path, "node": attr}
                 )
         return refs
 
@@ -127,9 +127,10 @@ class BreakdownSceneOperations(Hook):
 
         engine = self.parent.engine
 
+        self.parent.log_info("breakdown...")
         for i in items:
-
-            attr = i["attr"]
+            self.parent.log_info("%s" % i)
+            attr = i["node"]
             node_type = i["type"]
             new_path = i["path"]
 
