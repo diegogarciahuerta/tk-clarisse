@@ -26,7 +26,7 @@ With the engine, hooks for most of the standard tk application are provided:
 
 (I've also included a hook that allows to take a thumbnail of clarisse window, useful for configuring tk-multi-snapshot for example.)
 
-This engine has been tested in Windows using Clarisse iFX version 3.6.
+This engine has been tested in Windows using Clarisse iFX version 3.6, and Clarisse iFX version 4.0 Learning Edition (just released at the time of writting)
 
 
 ## Engine Installation
@@ -199,21 +199,31 @@ Hooks are provided to be able to use this tk-app, similar to workfiles2.
 
 The Shotgun Loader lets you quickly overview and browse the files that you have published to Shotgun. A searchable tree view navigation system makes it easy to quickly get to the task, shot or asset that you are looking for and once there the loader shows a thumbnail based overview of all the publishes for that item. Through configurable hooks you can then easily reference or import a publish into your current scene.
 
-The hooks provided support all the image formats, ffmpeg video formats and LUTs supported in Clarisse as of version 2.3.14. A " create read node" action has been implemented where internally the right clarisse plugin is used and configured accordingly, ie. 'fr.inria.openfx.OCIOFileTransform' used for LUTs,  'fr.inria.openfx.ReadOIIO' node is used for image extensions, 'fr.inria.openfx.ReadFFmpeg' for videos, and so on, with pdf, svg, psd, etc ... files.
+The hooks provided support all the input reference and import formats from Clarisse, from alembic files, usd files (Clarisse iFX v4.0+), lwo, obj, Clarisse project files, etc...
 
 ## [tk-multi-publish2](https://support.shotgunsoftware.com/hc/en-us/articles/115000097513)
 ![tk-clarisse_screenshot03](config/images/tk-clarisse_screenshot03.PNG)
 
 The Publish app allows artists to publish their work so that it can be used by artists downstream. It supports traditional publishing workflows within the artist’s content creation software as well as stand-alone publishing of any file on disk. When working in content creation software and using the basic Shotgun integration, the app will automatically discover and display items for the artist to publish. For more sophisticated production needs, studios can write custom publish plugins to drive artist workflows.
 
-Only the basic publishing of the current session is provided with this app. No publishing of write nodes has been implemented yet.
+Only the basic publishing of the current session is provided with this app. 
 
 ## [tk-multi-breakdown](https://support.shotgunsoftware.com/hc/en-us/articles/219032988)
 ![tk-clarisse_screenshot02](config/images/tk-clarisse_screenshot02.PNG)
 
 The Scene Breakdown App shows you a list of items you have loaded (referenced) in your scene and tells you which ones are out of date. From this overview, you can select multiple objects and click the update button which will update all your selected items to use the latest published version.
 
-Hook provided support the updating of read and write nodes within Clarisse.
+Hook provided support the updating of the following type of nodes (basically, alembic, usd, or any other geometric format supported at of the writting of the engine):
+- GeometryPolyfile
+- GeometryFurFile
+- GeometryVolumeFile
+- GeometryBundleAlembic
+- GeometryBundleUsd
+- ProcessAlembicExport
+- LightPhysicalSphere
+- TextureMapFile
+- TextureStreamedMapFile
+- TextureOslFile
 
 ## [tk-multi-setframerange](https://support.shotgunsoftware.com/hc/en-us/articles/219033038)
 This is a simple yet useful app that syncs your current file with the latest frame range in Shotgun for the associated shot. If a change to the cut has come in from editorial, quickly and safely update the scene you are working on using this app. Towards the end, it will display a UI with information about what got changed.
