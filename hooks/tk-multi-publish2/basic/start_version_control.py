@@ -18,7 +18,7 @@ from sgtk.util.filesystem import ensure_folder_exists
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 HookBaseClass = sgtk.get_hook_baseclass()

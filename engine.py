@@ -33,7 +33,7 @@ import pyqt_clarisse
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 # initialize our shotgun structure for the session
 if not hasattr(ix, "shotgun"):
@@ -102,7 +102,7 @@ def display_debug(msg):
 
 # we use a trick with decorators to get some sort of event notification
 # when the scene is saved/loaded, etc... we could use a timer similar to
-# what tk-houdini uses but this other apporach is more generic
+# what tk-houdini uses but this other aproach is more generic
 def wrapped(function, watcher, post_callback=None, pre_callback=None):
     @wraps(function)
     def wrapper(*args, **kwargs):
@@ -269,7 +269,8 @@ def refresh_engine(engine_name, prev_context, menu_name):
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
             message = ""
             message += "Shotgun Clarisse Engine cannot be started:.\n"
-            message += "Please contact you technical support team for more information.\n\n"
+            message += "Please contact you technical support team for more "
+            message += "information.\n\n"
             message += "Exception: %s - %s\n" % (exc_type, exc_value)
             message += "Traceback (most recent call last):\n"
             message += "\n".join(traceback.format_tb(exc_traceback))
@@ -304,7 +305,8 @@ def on_scene_event_callback(engine_name, prev_context, menu_name):
             "Message: Shotgun encountered a problem changing the "
             "Engine's context.\n"
         )
-        message += "Please contact you technical support team for more information.\n\n"
+        message += "Please contact you technical support team for more "
+        message += "information.\n\n"
         message += "Exception: %s - %s\n" % (exc_type, exc_value)
         message += "Traceback (most recent call last):\n"
         message += "\n".join(traceback.format_tb(exc_traceback))
@@ -397,7 +399,7 @@ class ClarisseEngine(Engine):
         """
         Opens the file system folder where log files are being stored.
         """
-        self.log_info("Log folder is located in '%s'" % LogManager().log_folder)
+        self.log_info("Log folder location: '%s'" % LogManager().log_folder)
 
         if self.has_ui:
             # only import QT if we have a UI
@@ -421,7 +423,9 @@ class ClarisseEngine(Engine):
                 {
                     "short_name": "open_log_folder",
                     "icon": self.__get_platform_resource_path("folder_256.png"),
-                    "description": "Opens the folder where log files are being stored.",
+                    "description": (
+                        "Opens the folder where log files are being stored."
+                    ),
                     "type": "context_menu",
                 },
             )
@@ -517,17 +521,19 @@ class ClarisseEngine(Engine):
         clarisse_ver = float(".".join(clarisse_build_version.split(".")[:2]))
 
         if clarisse_ver < 3.6:
-            msg = "Shotgun integration is not compatible with Clarisse versions older than 3.6"
+            msg = "Shotgun integration is not compatible with Clarisse "
+            msg += "versions older than 3.6"
             raise tank.TankError(msg)
 
         if clarisse_ver > 4.0:
             # show a warning that this version of Clarisse isn't yet fully
             # tested with Shotgun:
             msg = (
-                "The Shotgun Pipeline Toolkit has not yet been fully tested with Clarisse %s.\n"
-                "You can continue to use Toolkit but you may experience bugs or instability."
-                "\n\nUse at your own risk."
-                % (clarisse_ver)
+                "The Shotgun Pipeline Toolkit has not yet been fully tested "
+                "with Clarisse %s.\n"
+                "You can continue to use Toolkit but you may experience bugs "
+                "or instability."
+                "\n\nUse at your own risk." % (clarisse_ver)
             )
 
             # determine if we should show the compatibility warning dialog:
@@ -546,7 +552,7 @@ class ClarisseEngine(Engine):
                     major_version_number_str
                     and major_version_number_str.isdigit()
                 ):
-                    # check against the compatibility_dialog_min_version setting:
+                    # check against the compatibility_dialog_min_version:
                     if int(major_version_number_str) < self.get_setting(
                         "compatibility_dialog_min_version"
                     ):
@@ -568,7 +574,8 @@ class ClarisseEngine(Engine):
             if current_os.startswith("win"):
                 self.logger.debug(
                     "Clarisse on Windows can deadlock if QtWebEngineWidgets "
-                    "is imported. Setting SHOTGUN_SKIP_QTWEBENGINEWIDGETS_IMPORT=1..."
+                    "is imported. "
+                    "Setting SHOTGUN_SKIP_QTWEBENGINEWIDGETS_IMPORT=1..."
                 )
                 os.environ["SHOTGUN_SKIP_QTWEBENGINEWIDGETS_IMPORT"] = "1"
 
@@ -585,8 +592,13 @@ class ClarisseEngine(Engine):
             # need to watch some scene events in case the engine needs
             # rebuilding:
 
-            cb_fn = partial(on_scene_event_callback, engine_name=self.instance_name, prev_context=self.context, menu_name=self._menu_name)
-            
+            cb_fn = partial(
+                on_scene_event_callback,
+                engine_name=self.instance_name,
+                prev_context=self.context,
+                menu_name=self._menu_name,
+            )
+
             self.__watcher = SceneEventWatcher(cb_fn, run_once=False)
             self.logger.debug("Registered open and save callbacks.")
 
@@ -667,11 +679,17 @@ class ClarisseEngine(Engine):
             # after a File->Open receives an up-to-date "previous" context.
             self.__watcher.stop_watching()
 
-            cb_fn = partial(on_scene_event_callback, engine_name=self.instance_name, prev_context=self.context, menu_name=self._menu_name)
+            cb_fn = partial(
+                on_scene_event_callback,
+                engine_name=self.instance_name,
+                prev_context=self.context,
+                menu_name=self._menu_name,
+            )
 
             self.__watcher = SceneEventWatcher(cb_fn, run_once=False)
             self.logger.debug(
-                "Registered new open and save callbacks before changing context."
+                "Registered new open and save callbacks before"
+                " changing context."
             )
 
             # finally create the menu with the new context if needed
@@ -711,7 +729,10 @@ class ClarisseEngine(Engine):
 
             if command_dict is None:
                 self.logger.warning(
-                    "%s configuration setting 'run_at_startup' requests app '%s' that is not installed.",
+                    (
+                        "%s configuration setting 'run_at_startup'"
+                        " requests app '%s' that is not installed."
+                    ),
                     self.name,
                     app_instance_name,
                 )
@@ -752,8 +773,11 @@ class ClarisseEngine(Engine):
                             "'%s'" % name for name in command_dict
                         )
                         self.logger.warning(
-                            "%s configuration setting 'run_at_startup' requests app '%s' unknown command '%s'. "
-                            "Known commands: %s",
+                            (
+                                "%s configuration setting 'run_at_startup' "
+                                "requests app '%s' unknown command '%s'. "
+                                "Known commands: %s"
+                            ),
                             self.name,
                             app_instance_name,
                             setting_command_name,
@@ -862,7 +886,6 @@ class ClarisseEngine(Engine):
         Clarisse is not Qt Based so we do not have anything to return here.
         """
         return None
-
 
     @property
     def has_ui(self):

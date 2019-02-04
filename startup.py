@@ -16,7 +16,7 @@ from sgtk.platform import SoftwareLauncher, SoftwareVersion, LaunchInformation
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 class ClarisseLauncher(SoftwareLauncher):
@@ -62,7 +62,8 @@ class ClarisseLauncher(SoftwareLauncher):
 
         :param str exec_path: Path to Clarisse executable to launch.
         :param str args: Command line arguments as strings.
-        :param str file_to_open: (optional) Full path name of a file to open on launch.
+        :param str file_to_open: (optional) Full path name of a file to open on
+                                 launch.
         :returns: :class:`LaunchInformation` instance
         """
         required_env = {}
@@ -93,7 +94,7 @@ class ClarisseLauncher(SoftwareLauncher):
 
         return LaunchInformation(exec_path, args, required_env)
 
-    ##########################################################################################
+    ###########################################################################
     # private methods
 
     def _icon_from_engine(self):
@@ -151,8 +152,8 @@ class ClarisseLauncher(SoftwareLauncher):
             # Extract all products from that executable.
             for (executable_path, key_dict) in executable_matches:
 
-                # extract the matched keys form the key_dict (default to None if
-                # not included)
+                # extract the matched keys form the key_dict (default to None 
+                # if not included)
                 executable_version = key_dict.get("version")
 
                 sw_versions.append(

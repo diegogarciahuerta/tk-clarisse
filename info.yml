@@ -1,14 +1,11 @@
-# ------------------------------------------------------------------------------
-# Copyright (C) 2018 Diego Garcia Huerta - All Rights Reserved
 #
-# CONFIDENTIAL AND PROPRIETARY
+# Copyright (c) 2012 Shotgun Software, Inc
+# ----------------------------------------------------
 #
-# Unauthorized copying of this file, via any medium is strictly prohibited
-# Proprietary and confidential
-# Written by Diego Garcia Huerta <diegogh2000@gmail.com>. October 2018
-# ------------------------------------------------------------------------------
+# Metadata defining the behavior and requirements for this engine
 
-# Metadata defining the behaviour and requirements for this engine
+# Author: Diego Garcia Huerta
+# Contact: https://www.linkedin.com/in/diegogh/
 
 # expected fields in the configuration file for this engine
 configuration:

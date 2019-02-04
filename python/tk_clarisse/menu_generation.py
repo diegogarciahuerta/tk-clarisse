@@ -1,11 +1,11 @@
 # Copyright (c) 2013 Shotgun Software Inc.
-# 
+#
 # CONFIDENTIAL AND PROPRIETARY
-# 
-# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit 
+#
+# This work is provided "AS IS" and subject to the Shotgun Pipeline Toolkit
 # Source Code License included in this distribution package. See LICENSE.
-# By accessing, using, copying or modifying this work you indicate your 
-# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights 
+# By accessing, using, copying or modifying this work you indicate your
+# agreement to the Shotgun Pipeline Toolkit Source Code License. All rights
 # not expressly granted therein are reserved by Shotgun Software Inc.
 
 """
@@ -25,7 +25,7 @@ import ix
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 class MenuGenerator(object):
@@ -303,25 +303,7 @@ class AppCommand(object):
                 parent_menu = sub_menu
             else:
                 # create new sub menu
-                # params = {
-                #    "label" : item_label,
-                #
-                #    "parent" : parent_menu,
-                #    "subMenu" : True
-                # }
-                # parent_menu = pm.menuItem(**params)
                 parent_menu = self.parent._add_sub_menu(item_label, parent_menu)
-
-        # finally create the command menu item:
-        # params = {
-        #     "label": parts[-1],#self.name,
-        #     "command": Callback(self._execute_deferred),
-        #     "parent": parent_menu,
-        # }
-        # if "tooltip" in self.properties:
-        #     params["annotation"] = self.properties["tooltip"]
-        # if "enable_callback" in self.properties:
-        #     params["enable"] = self.properties["enable_callback"]()
 
         self.parent._add_menu_item(
             parts[-1], parent_menu, self._execute_deferred
@@ -333,11 +315,7 @@ class AppCommand(object):
         command resulting in the menu being deleted, e.g. if the context 
         changes resulting in an engine restart
         """
-        ix.application.check_for_events()
-        ix.application.disable()
         self._execute_within_exception_trap()
-        ix.application.enable()
-        ix.application.check_for_events()
 
     def _execute_within_exception_trap(self):
         """
@@ -346,6 +324,9 @@ class AppCommand(object):
         """
 
         try:
+            ix.application.check_for_events()
+            ix.application.disable()
+
             self.callback()
         except Exception:
             (exc_type, exc_value, exc_traceback) = sys.exc_info()
@@ -359,21 +340,14 @@ class AppCommand(object):
 
             current_engine = tank.platform.current_engine()
             current_engine.logger.exception(message)
-
-    def _find_sub_menu_item(self, menu, label):
+        finally:
+            ix.application.enable()
+            ix.application.check_for_events()
+            
+    def _find_sub_menu_item(self, parent_menu_name, menu_name):
         """
         Find the 'sub-menu' menu item with the given label
         """
-        items = pm.menu(menu, query=True, itemArray=True)
-        for item in items:
-            item_path = "%s|%s" % (menu, item)
 
-            # only care about menuItems that have sub-menus:
-            if not pm.menuItem(item_path, query=True, subMenu=True):
-                continue
-
-            item_label = pm.menuItem(item_path, query=True, label=True)
-            if item_label == label:
-                return item_path
-
-        return None
+        menu_item = parent_menu_name + menu_name + ">"
+        return ix.shotgun.menu_callbacks.get(menu_item)

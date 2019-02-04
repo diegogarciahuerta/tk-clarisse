@@ -19,7 +19,7 @@ HookClass = sgtk.get_hook_baseclass()
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 class SceneOperation(HookClass):
@@ -72,16 +72,18 @@ class SceneOperation(HookClass):
                                 - save_file_as
                                 - version_up
 
-        :param file_version:    The version/revision of the file to be opened.  If this is 'None'
-                                then the latest version should be opened.
+        :param file_version:    The version/revision of the file to be opened. 
+                                If this is 'None' then the latest version
+                                should be opened.
 
-        :param read_only:       Specifies if the file should be opened read-only or not
+        :param read_only:       Specifies if the file should be opened
+                                read-only or not
 
         :returns:               Depends on operation:
                                 'current_path' - Return the current scene
                                                  file path as a String
-                                'reset'        - True if scene was reset to an empty
-                                                 state, otherwise False
+                                'reset'        - True if scene was reset to an 
+                                                 empty state, otherwise False
                                 all others     - None
         """
         app = self.parent

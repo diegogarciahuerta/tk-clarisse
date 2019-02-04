@@ -21,7 +21,7 @@ from sgtk.errors import TankError
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 HookBaseClass = sgtk.get_hook_baseclass()
@@ -78,8 +78,8 @@ class ClarisseActions(HookBaseClass):
         - If it will be shown in the details area, "details" is passed.
         - If it will be shown in the history area, "history" is passed.
 
-        Please note that it is perfectly possible to create more than one action
-        "instance" for an action!
+        Please note that it is perfectly possible to create more than one 
+        action "instance" for an action!
         You can for example do scene introspectionvif the action passed in 
         is "character_attachment" you may for examplevscan the scene, figure
         out all the nodes where this object can bevattached and return a list
@@ -111,8 +111,10 @@ class ClarisseActions(HookBaseClass):
                     "name": "reference",
                     "params": None,
                     "caption": "Create Reference",
-                    "description": ("This will add the item to the current "
-                                    "context as a standard reference."),
+                    "description": (
+                        "This will add the item to the current "
+                        "context as a standard reference."
+                    ),
                 }
             )
 
@@ -122,8 +124,9 @@ class ClarisseActions(HookBaseClass):
                     "name": "import",
                     "params": None,
                     "caption": "Import into Scene",
-                    "description": ("This will import the item into the "
-                                    "current context."),
+                    "description": (
+                        "This will import the item into the current context."
+                    ),
                 }
             )
 
@@ -133,8 +136,10 @@ class ClarisseActions(HookBaseClass):
                     "name": "texture_node",
                     "params": None,
                     "caption": "Import Texture Map File",
-                    "description": ("Creates a file texture node for the"
-                                    "selected item in the current context"),
+                    "description": (
+                        "Creates a file texture node for the"
+                        "selected item in the current context"
+                    ),
                 }
             )
 
@@ -144,8 +149,10 @@ class ClarisseActions(HookBaseClass):
                     "name": "texture_stream_node",
                     "params": None,
                     "caption": "Import Texture Streaming Map File",
-                    "description": ("Creates a file texture node for the" 
-                                    "selected item in the current context"),
+                    "description": (
+                        "Creates a file texture node for the"
+                        "selected item in the current context"
+                    ),
                 }
             )
 
@@ -202,14 +209,12 @@ class ClarisseActions(HookBaseClass):
         app = self.parent
         app.log_debug(
             "Execute action called for action %s. "
-            "Parameters: %s. Publish Data: %s" % (name,
-                                                  params,
-                                                  sg_publish_data)
+            "Parameters: %s. Publish Data: %s" % (name, params, sg_publish_data)
         )
 
         # resolve path
-        # toolkit uses utf-8 encoded strings internally and Clarisse API 
-        # expects unicode so convert the path to ensure filenames containing 
+        # toolkit uses utf-8 encoded strings internally and Clarisse API
+        # expects unicode so convert the path to ensure filenames containing
         # complex characters are supported
         path = self.get_publish_path(sg_publish_data).replace(os.path.sep, "/")
 

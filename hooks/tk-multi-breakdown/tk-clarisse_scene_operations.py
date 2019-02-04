@@ -14,8 +14,7 @@ import os
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
-
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 def get_contexts(context, result=None):
@@ -24,22 +23,22 @@ def get_contexts(context, result=None):
     """
     if result is None:
         result = []
-        
+
     result.append(context)
     subcontext_count = context.get_context_count()
     for i in range(subcontext_count):
         subcontext = context.get_context(i)
         get_contexts(subcontext, result=result)
-        
+
     return result
-    
+
 
 class BreakdownSceneOperations(Hook):
     """
     Breakdown operations for Clarisse.
 
     This implementation handles detection of clarisse file geometric, 
-    alembic and texture nodes.
+    alembic, usd and texture nodes.
     """
 
     def scan_scene(self):
@@ -69,7 +68,9 @@ class BreakdownSceneOperations(Hook):
         # publishedFiles and could count as dependencies.
         #
         # This link has got a way to get these types dynamically
-        # but it briefly changes the state of the scene.
+        # but it briefly changes the state of the scene so we
+        # choose to hard code the types here instead , which seems
+        # faster and safer.
         # https://forum.isotropix.com/viewtopic.php?p=14779
 
         refs = []
@@ -81,7 +82,7 @@ class BreakdownSceneOperations(Hook):
             "GeometryBundleAlembic",
             "GeometryBundleUsd",
             "ProcessAlembicExport",
-            "LightPhysicalSphere", 
+            "LightPhysicalSphere",
             "TextureMapFile",
             "TextureStreamedMapFile",
             "TextureOslFile",
@@ -96,19 +97,29 @@ class BreakdownSceneOperations(Hook):
                     ref_path = attr.get_string()
                     ref_path = ref_path.replace("/", os.path.sep)
                     refs.append(
-                        {"attr": attr, "type": "file", "path": ref_path, "node":attr}
+                        {
+                            "attr": attr,
+                            "type": "file",
+                            "path": ref_path,
+                            "node": attr,
+                        }
                     )
 
-        # also do the contexts
-        context= ix.get_current_context()
+        # also do all the contexts
+        context = ix.get_item("project:/")
         contexts = get_contexts(context)
         for context in contexts:
-            attr = context.get_attribute('filename')
+            attr = context.get_attribute("filename")
             if attr:
                 ref_path = attr.get_string()
                 ref_path = ref_path.replace("/", os.path.sep)
                 refs.append(
-                    {"type": "file", "path": ref_path, "node": attr}
+                    {
+                        "attr": attr,
+                        "type": "file",
+                        "path": ref_path,
+                        "node": attr,
+                    }
                 )
         return refs
 
@@ -127,9 +138,7 @@ class BreakdownSceneOperations(Hook):
 
         engine = self.parent.engine
 
-        self.parent.log_info("breakdown...")
         for i in items:
-            self.parent.log_info("%s" % i)
             attr = i["node"]
             node_type = i["type"]
             new_path = i["path"]

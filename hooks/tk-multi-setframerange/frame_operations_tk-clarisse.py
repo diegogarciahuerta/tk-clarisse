@@ -17,7 +17,7 @@ HookBaseClass = sgtk.get_hook_baseclass()
 
 
 __author__ = "Diego Garcia Huerta"
-__email__ = "diegogh2000@gmail.com"
+__contact__ = "https://www.linkedin.com/in/diegogh/"
 
 
 class FrameOperation(HookBaseClass):
