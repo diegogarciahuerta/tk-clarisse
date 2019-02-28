@@ -30,22 +30,36 @@ class ClarisseLauncher(SoftwareLauncher):
     # matching against supplied versions and products. Similar to the glob
     # strings, these allow us to alter the regex matching for any of the
     # variable components of the path in one place
-    COMPONENT_REGEX_LOOKUP = {"version": "\d.\d", "service_pack": "SP\d"}
+    COMPONENT_REGEX_LOOKUP = {"version": r"\d.\d", "minor":"[a-zA-Z]*",
+                              "service_pack": r"SP\d"}
 
     # This dictionary defines a list of executable template strings for each
     # of the supported operating systems. The templates are used for both
     # globbing and regex matches by replacing the named format placeholders
     # with an appropriate glob or regex string.
 
+    # Clarisse can be installed in different locations, since we cannot predict
+    # where it will be located, we resort to letting the user define an
+    # environment variable that points to the folder location where the
+    # executable is located, that way we cover all cases. The disadvantage of
+    # this is that we do not get a version number out of it.
     EXECUTABLE_TEMPLATES = {
         "darwin": [
-            "/Applications/Isotropix/Clarisse iFX {version}/Clarisse.app"
+            "/Applications/Isotropix/Clarisse iFX {version}{minor}/clarisse.app",
+            "/Applications/Isotropix/Clarisse iFX {version}{minor} {service_pack}/clarisse.app",
+            "$CLARISSE_BIN_DIR/Clarisse.app"
         ],
         "win32": [
-            "C:/Program Files/Isotropix/Clarisse iFX {version}/Clarisse/clarisse.exe",
-            "C:/Program Files/Isotropix/Clarisse iFX {version} {service_pack}/Clarisse/clarisse.exe",
+            "C:/Program Files/Isotropix/Clarisse iFX {version}{minor}/Clarisse/clarisse.exe",
+            "C:/Program Files/Isotropix/Clarisse iFX {version}{minor} {service_pack}/Clarisse/clarisse.exe"
+            "$CLARISSE_BIN_DIR/clarisse.exe"
         ],
-        "linux2": ["/usr/isotropix/clarisse ifx {version}/bin/clarisse"],
+        "linux2": [
+            "/usr/Isotropix/Clarisse iFX {version}{minor}/clarisse/clarisse",
+            "/usr/Isotropix/Clarisse iFX {version}{minor} {service_pack}/clarisse/clarisse",
+            "/opt/Isotropix/Clarisse iFX {version}{minor}/clarisse/clarisse",
+            "/opt/Isotropix/Clarisse iFX {version}{minor} {service_pack}/clarisse/clarisse",
+            "$CLARISSE_BIN_DIR/clarisse"]
     }
 
     @property
@@ -142,8 +156,10 @@ class ClarisseLauncher(SoftwareLauncher):
         sw_versions = []
 
         for executable_template in executable_templates:
+            executable_template = os.path.expanduser(executable_template)
+            executable_template = os.path.expandvars(executable_template)
 
-            self.logger.debug("Processing template %s.", executable_template)
+            self.logger.debug("Processing template %s", executable_template)
 
             executable_matches = self._glob_and_match(
                 executable_template, self.COMPONENT_REGEX_LOOKUP
@@ -152,9 +168,15 @@ class ClarisseLauncher(SoftwareLauncher):
             # Extract all products from that executable.
             for (executable_path, key_dict) in executable_matches:
 
-                # extract the matched keys form the key_dict (default to None 
-                # if not included)
-                executable_version = key_dict.get("version")
+                # extract the matched keys form the key_dict.
+                # in the case of version we return something different than
+                # an empty string because there are cases were the installation
+                # directories do not include version number information.
+                executable_version = key_dict.get("version", " ")
+                if "minor" in key_dict:
+                    executable_version += key_dict["minor"]
+                if "service_pack" in key_dict:
+                    executable_version += " " + key_dict["service_pack"]
 
                 sw_versions.append(
                     SoftwareVersion(

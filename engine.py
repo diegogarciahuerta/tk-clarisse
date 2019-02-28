@@ -29,7 +29,6 @@ from tank.platform import Engine
 from tank.platform.constants import SHOTGUN_ENGINE_NAME
 
 import ix
-import pyqt_clarisse
 
 
 __author__ = "Diego Garcia Huerta"
@@ -510,8 +509,8 @@ class ClarisseEngine(Engine):
         self.logger.debug("%s: Initializing...", self)
 
         # check that we are running an ok version of clarisse
-        current_os = sys.platform
-        if current_os not in ["mac", "win32", "linux64"]:
+        current_os = sys.platform.lower()
+        if current_os not in ["darwin", "win32", "linux64"]:
             raise tank.TankError(
                 "The current platform is not supported! Supported platforms "
                 "are Mac, Linux 64 and Windows 64."
@@ -642,6 +641,7 @@ class ClarisseEngine(Engine):
             # set up the dark style
             self._initialize_dark_look_and_feel()
 
+        import pyqt_clarisse
         pyqt_clarisse.exec_(qt_app)
 
     def post_app_init(self):
@@ -816,7 +816,7 @@ class ClarisseEngine(Engine):
         try:
             from PySide import QtGui
         except:
-            # must be a very old version of Clarisse.
+            # must be that a PySide version is not installed,
             self.logger.debug(
                 "PySide not detected - it will be added to the setup now..."
             )
@@ -827,45 +827,26 @@ class ClarisseEngine(Engine):
             )
             return
 
-        if sys.platform == "darwin":
-            pyside_path = os.path.join(
-                self.disk_location,
-                "resources",
-                "pyside112_py26_qt471_mac",
-                "python",
-            )
-            self.logger.debug("Adding pyside to sys.path: %s", pyside_path)
-            sys.path.append(pyside_path)
+        current_os = sys.platform.lower()
+        if current_os == "darwin":
+            desktop_path = os.environ.get("SHOTGUN_DESKTOP_INSTALL_PATH",
+                                          "/Applications/Shotgun.app")
+            sys.path.append(os.path.join(desktop_path, "Contents", "Resources",
+                                         "Python", "lib", "python2.7",
+                                         "site-packages"))    
 
-        elif sys.platform == "win32":
-            # default windows version of pyside for 2011 and 2012
-            pyside_path = os.path.join(
-                self.disk_location,
-                "resources",
-                "pyside111_py26_qt471_win64",
-                "python",
-            )
-            self.logger.debug("Adding pyside to sys.path: %s", pyside_path)
-            sys.path.append(pyside_path)
-            dll_path = os.path.join(
-                self.disk_location,
-                "resources",
-                "pyside111_py26_qt471_win64",
-                "lib",
-            )
-            path = os.environ.get("PATH", "")
-            path += ";%s" % dll_path
-            os.environ["PATH"] = path
+        elif current_os == "win32":
+            desktop_path = os.environ.get("SHOTGUN_DESKTOP_INSTALL_PATH",
+                                          "C:/Program Files/Shotgun")
+            sys.path.append(os.path.join(desktop_path,
+                                         "Python", "Lib", "site-packages"))
 
-        elif sys.platform == "linux2":
-            pyside_path = os.path.join(
-                self.disk_location,
-                "resources",
-                "pyside112_py26_qt471_linux",
-                "python",
-            )
-            self.logger.debug("Adding pyside to sys.path: %s", pyside_path)
-            sys.path.append(pyside_path)
+        elif current_os == "linux2":
+            desktop_path = os.environ.get("SHOTGUN_DESKTOP_INSTALL_PATH",
+                                          "/opt/Shotgun/Shotgun")
+            sys.path.append(os.path.join(desktop_path,
+                                         "Python", "Lib", "site-packages"))
+
 
         else:
             self.logger.error("Unknown platform - cannot initialize PySide!")
