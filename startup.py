@@ -51,7 +51,7 @@ class ClarisseLauncher(SoftwareLauncher):
         ],
         "win32": [
             "C:/Program Files/Isotropix/Clarisse iFX {version}{minor}/Clarisse/clarisse.exe",
-            "C:/Program Files/Isotropix/Clarisse iFX {version}{minor} {service_pack}/Clarisse/clarisse.exe"
+            "C:/Program Files/Isotropix/Clarisse iFX {version}{minor} {service_pack}/Clarisse/clarisse.exe",
             "$CLARISSE_BIN_DIR/clarisse.exe"
         ],
         "linux2": [
